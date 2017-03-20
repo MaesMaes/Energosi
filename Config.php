@@ -1,6 +1,6 @@
 <?php
 
-require_once "Database.php";
+require_once "Query.php";
 
 /**
  * Created by PhpStorm.
@@ -18,8 +18,12 @@ class Config
      */
     function __construct()
     {
-        // Создание инстанса для коннекта в БД
-        $db = new SafeMySQL();
+        /**
+         * Ссылка на соединение с БД, можно было создать еще одну абстрацию вынеся этот возврат в метод данного
+         * класса или создать вспомогательный класс с таким методом и наследовать его, но в данной задаче
+         * такое решение не целесообразно. Не будем плодить абстрации.
+         */
+        $db = Query::getInstance()->getSafeMySQL();
 
         // Получаем все параметры в виде ассоциативного массива [param] => val
         $data = $db->getIndCol("paramName", "SELECT paramName, paramValue FROM config");
@@ -63,7 +67,7 @@ class Config
     public static function save()
     {
         // Создание инстанса для коннекта в БД
-        $db = new SafeMySQL();
+        $db = Query::getInstance()->getSafeMySQL();
 
         foreach ( self::$params as $p => $v)
         {
