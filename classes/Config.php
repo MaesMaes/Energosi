@@ -10,8 +10,14 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/db/Query.php";
  */
 class Config
 {
-    // Хранит ассоциативный массив параметров и значений
+    // Хранит ассоциативный массив параметров и значений из БД
     private static $params = array();
+
+    // Новые параметры для добавления в базу
+    private static $paramsNew = array();
+
+    // Параметры из БД которые изменили в ходе выполнения программы
+    private static $paramsChange = array();
 
     /**
      * Config constructor.
@@ -40,7 +46,11 @@ class Config
      */
     public static function getParam( $param )
     {
-        return self::$params[$param];
+        // Если параметр есть в основном списке
+        if( self::$params[$param] ) return self::$params[$param];
+
+        // Новый параметр
+        return self::$paramsNew[$param];
     }
 
     /**
@@ -49,7 +59,7 @@ class Config
      */
     public static function getParams()
     {
-        return self::$params;
+        return array_merge( self::$params, self::$paramsNew );
     }
 
     /**
@@ -60,21 +70,41 @@ class Config
      */
     public static function setParam( $param, $val )
     {
-        self::$params[$param] = $val;
+        // Если параметр существует - запишем в обновленные, иначе запишем в новые
+        if( self::$params[$param] )
+        {
+            // Это для update DB
+            self::$paramsChange[$param] = $val;
+
+            // Это для вывода пользователю
+            self::$params[$param] = $val;
+        }
+        else
+        {
+            self::$paramsNew[$param] = $val;
+        }
     }
 
-    // Сохраняем все поля статического свойства $params в БД
+    // Сохраняем все поля статических свойств $params и $paramsNew в БД
     public static function save()
     {
         // Создание инстанса для коннекта в БД
         $db = Query::getInstance()->getSafeMySQL();
 
-        // Так можно делать только если количество параметров небольшое, засечем время:
         $start = microtime( true );
-        foreach ( self::$params as $p => $v )
+
+        // Добовляем товары в базу
+        foreach ( self::$paramsNew as $p => $v )
         {
             $sql  = "INSERT INTO config SET paramName=?s, paramValue=?s";
             $db->query( $sql, $p , $v );
+        }
+
+        // Изменяем товары в базе
+        foreach ( self::$paramsChange as $p => $v )
+        {
+            $sql = "UPDATE config SET paramValue=?s WHERE paramName=?s";
+            $db->query( $sql, $v , $p );
         }
 
         // Получил 0.0025 сек. - в данном случае можно оставить
