@@ -1,6 +1,6 @@
 <?php
 
-require_once "Query.php";
+require_once $_SERVER['DOCUMENT_ROOT'] . "/db/Query.php";
 
 /**
  * Created by PhpStorm.
@@ -69,10 +69,15 @@ class Config
         // Создание инстанса для коннекта в БД
         $db = Query::getInstance()->getSafeMySQL();
 
-        foreach ( self::$params as $p => $v)
+        // Так можно делать только если количество параметров небольшое, засечем время:
+        $start = microtime( true );
+        foreach ( self::$params as $p => $v )
         {
             $sql  = "INSERT INTO config SET paramName=?s, paramValue=?s";
             $db->query( $sql, $p , $v );
         }
+
+        // Получил 0.0025 сек. - в данном случае можно оставить
+        echo 'Время выполнения метода save(): '.( microtime( true ) - $start ).' сек.';
     }
 }
