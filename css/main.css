@@ -1,0 +1,25 @@
+html, body {
+  padding: 0;
+  margin: 0;
+  font-family: 'Open Sans', sans-serif; }
+
+.container {
+  width: 820px;
+  margin: 0 auto;
+  padding: 10px 15px; }
+  .container h1 span, .container h2 span {
+    color: #03A9F4; }
+  .container pre {
+    background: #f6f6f6;
+    padding: 10px;
+    font-size: 14px;
+    color: #373737; }
+  .container h1 {
+    line-height: 10px;
+    margin-top: 40px; }
+  .container h2 {
+    margin-top: 30px;
+    margin-bottom: 5px;
+    color: #222222; }
+
+/*# sourceMappingURL=main.css.map */
